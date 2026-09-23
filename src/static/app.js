@@ -180,6 +180,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (themeLabel) {
       themeLabel.textContent = isDarkMode ? "Light" : "Dark";
     }
+    if (themeToggle) {
+      themeToggle.setAttribute("aria-pressed", isDarkMode ? "true" : "false");
+    }
 
     localStorage.setItem("theme", isDarkMode ? "dark" : "light");
   }
