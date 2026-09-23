@@ -7,6 +7,7 @@ A super simple website application that allows students to view and sign up for 
 - View all available extracurricular activities
 - Filter activities by difficulty level (Beginner, Intermediate, Advanced, or unassigned)
 - Sign up for activities
+- Switch between light and dark mode using the header toggle
 
 ## Development Guide
 
