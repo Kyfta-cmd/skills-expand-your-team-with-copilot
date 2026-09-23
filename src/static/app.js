@@ -199,6 +199,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (themeToggle) {
       themeToggle.setAttribute("aria-pressed", isDarkMode ? "true" : "false");
+      themeToggle.setAttribute(
+        "aria-label",
+        isDarkMode ? "Switch to light mode" : "Switch to dark mode"
+      );
     }
 
     saveTheme(isDarkMode ? "dark" : "light");
