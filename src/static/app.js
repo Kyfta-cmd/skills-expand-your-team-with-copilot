@@ -309,7 +309,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function createActivityShareUrl(activityName) {
-    const url = new URL("/static/index.html", window.location.origin);
+    const url = new URL(window.location.href);
     url.hash = encodeURIComponent(activityName);
     return url.toString();
   }
@@ -396,7 +396,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function highlightActivityFromHash() {
-    const activityName = decodeURIComponent(window.location.hash.slice(1));
+    const rawHash = window.location.hash.slice(1);
+    let activityName = rawHash;
+
+    try {
+      activityName = decodeURIComponent(rawHash);
+    } catch (error) {
+      console.warn("Ignoring invalid activity hash.", error);
+    }
 
     document.querySelectorAll(".activity-card-highlight").forEach((card) => {
       card.classList.remove("activity-card-highlight");
