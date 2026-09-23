@@ -40,6 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let searchQuery = "";
   let currentDay = "";
   let currentTimeRange = "";
+  let sharedActivityFocusHandled = false;
 
   // Authentication state
   let currentUser = null;
@@ -395,7 +396,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   }
 
-  function highlightActivityFromHash() {
+  function highlightActivityFromHash(shouldMoveFocus = false) {
     const rawHash = window.location.hash.slice(1);
     let activityName = rawHash;
 
@@ -422,7 +423,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     activityCard.classList.add("activity-card-highlight");
-    activityCard.focus({ preventScroll: true });
+    if (shouldMoveFocus && !sharedActivityFocusHandled) {
+      activityCard.focus({ preventScroll: true });
+      sharedActivityFocusHandled = true;
+    }
     activityCard.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
@@ -593,7 +597,7 @@ document.addEventListener("DOMContentLoaded", () => {
       renderActivityCard(name, details);
     });
 
-    highlightActivityFromHash();
+    highlightActivityFromHash(true);
   }
 
   // Function to render a single activity card
@@ -688,14 +692,12 @@ document.addEventListener("DOMContentLoaded", () => {
             <button
               type="button"
               class="share-button native-share-button"
-              aria-label="Share ${name}"
             >
               Share
             </button>
             <button
               type="button"
               class="share-button copy-share-button"
-              aria-label="Copy share link for ${name}"
             >
               Copy Link
             </button>
@@ -706,7 +708,6 @@ document.addEventListener("DOMContentLoaded", () => {
               )}&body=${encodeURIComponent(
                 `${shareText}\n\nLearn more here: ${shareUrl}`
               )}"
-              aria-label="Email ${name}"
             >
               Email
             </a>
@@ -1037,7 +1038,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeRangeFilter,
   };
 
-  window.addEventListener("hashchange", highlightActivityFromHash);
+  window.addEventListener("hashchange", () => highlightActivityFromHash());
 
   // Initialize app
   checkAuthentication();
