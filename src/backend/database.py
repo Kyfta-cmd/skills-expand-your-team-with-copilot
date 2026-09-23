@@ -46,6 +46,7 @@ initial_activities = {
     "Programming Class": {
         "description": "Learn programming fundamentals and build software projects",
         "schedule": "Tuesdays and Thursdays, 7:00 AM - 8:00 AM",
+        "difficulty_level": "Beginner",
         "schedule_details": {
             "days": ["Tuesday", "Thursday"],
             "start_time": "07:00",
@@ -134,6 +135,7 @@ initial_activities = {
     "Weekend Robotics Workshop": {
         "description": "Build and program robots in our state-of-the-art workshop",
         "schedule": "Saturdays, 10:00 AM - 2:00 PM",
+        "difficulty_level": "Intermediate",
         "schedule_details": {
             "days": ["Saturday"],
             "start_time": "10:00",
@@ -145,6 +147,7 @@ initial_activities = {
     "Science Olympiad": {
         "description": "Weekend science competition preparation for regional and state events",
         "schedule": "Saturdays, 1:00 PM - 4:00 PM",
+        "difficulty_level": "Advanced",
         "schedule_details": {
             "days": ["Saturday"],
             "start_time": "13:00",
