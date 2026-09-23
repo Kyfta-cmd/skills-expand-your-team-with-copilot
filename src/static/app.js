@@ -43,6 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentTimeRange = "";
   let sharedActivityFocusHandled = false;
   let isResettingFiltersForSharedActivity = false;
+  let latestFetchRequestId = 0;
 
   // Authentication state
   let currentUser = null;
@@ -497,6 +498,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function fetchActivities() {
     // Show loading skeletons first
     showLoadingSkeletons();
+    const requestId = ++latestFetchRequestId;
 
     try {
       // Build query string with filters if they exist
@@ -527,12 +529,20 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch(`/activities${queryString}`);
       const activities = await response.json();
 
+      if (requestId !== latestFetchRequestId) {
+        return;
+      }
+
       // Save the activities data
       allActivities = activities;
 
       // Apply search and filter, and handle weekend filter in client
       displayFilteredActivities();
     } catch (error) {
+      if (requestId !== latestFetchRequestId) {
+        return;
+      }
+
       activitiesList.innerHTML =
         "<p>Failed to load activities. Please try again later.</p>";
       console.error("Error fetching activities:", error);
@@ -705,6 +715,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <button
               type="button"
               class="share-button native-share-button"
+              aria-label="Share ${name}"
             >
               Share
             </button>
@@ -714,6 +725,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <button
               type="button"
               class="share-button copy-share-button"
+              aria-label="Copy link for ${name}"
             >
               Copy Link
             </button>
@@ -724,6 +736,7 @@ document.addEventListener("DOMContentLoaded", () => {
               )}&body=${encodeURIComponent(
                 `${shareText}\n\nLearn more here: ${shareUrl}`
               )}"
+              aria-label="Email ${name}"
             >
               Email
             </a>

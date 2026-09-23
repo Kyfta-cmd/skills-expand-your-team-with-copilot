@@ -3,9 +3,26 @@ const assert = require("node:assert/strict");
 
 const {
   copyTextToClipboard,
+  createActivityDomIdValue,
+  createActivityShareText,
   createActivityShareUrl,
   decodeActivityHash,
 } = require("./share-utils.js");
+
+test("createActivityDomIdValue returns a share-safe id value", () => {
+  assert.equal(createActivityDomIdValue("Drama Club!"), "Drama-20Club!");
+});
+
+test("createActivityShareText includes the activity details and schedule", () => {
+  assert.equal(
+    createActivityShareText(
+      "Chess Club",
+      { description: "Learn strategies and compete in chess tournaments" },
+      "Monday, 3:15 PM - 4:45 PM"
+    ),
+    "Check out Chess Club at Mergington High School! Learn strategies and compete in chess tournaments Meets Monday, 3:15 PM - 4:45 PM."
+  );
+});
 
 test("createActivityShareUrl preserves the current path and query string", () => {
   const shareUrl = createActivityShareUrl(
@@ -17,6 +34,10 @@ test("createActivityShareUrl preserves the current path and query string", () =>
     shareUrl,
     "https://example.com/school/static/index.html?view=cards#Chess%20Club"
   );
+});
+
+test("decodeActivityHash decodes valid activity names", () => {
+  assert.equal(decodeActivityHash("#Chess%20Club"), "Chess Club");
 });
 
 test("decodeActivityHash falls back to the raw hash when decoding fails", () => {
