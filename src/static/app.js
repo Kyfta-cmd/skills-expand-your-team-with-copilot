@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.getElementById("login-form");
   const closeLoginModal = document.querySelector(".close-login-modal");
   const loginMessage = document.getElementById("login-message");
+  const shareUtils = window.shareUtils;
 
   // Activity categories with corresponding colors
   const activityTypes = {
@@ -41,6 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentDay = "";
   let currentTimeRange = "";
   let sharedActivityFocusHandled = false;
+  let isResettingFiltersForSharedActivity = false;
 
   // Authentication state
   let currentUser = null;
@@ -305,44 +307,12 @@ document.addEventListener("DOMContentLoaded", () => {
     return details.schedule;
   }
 
-  function createActivityDomIdValue(activityName) {
-    return encodeURIComponent(activityName).replace(/%/g, "-");
-  }
-
-  function createActivityShareUrl(activityName) {
-    const url = new URL(window.location.href);
-    url.hash = encodeURIComponent(activityName);
-    return url.toString();
-  }
-
-  function createActivityShareText(activityName, details, formattedSchedule) {
-    return `Check out ${activityName} at Mergington High School! ${details.description} Meets ${formattedSchedule}.`;
-  }
-
-  async function copyTextToClipboard(text) {
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(text);
-      return;
-    }
-
-    const textArea = document.createElement("textarea");
-    textArea.value = text;
-    textArea.setAttribute("readonly", "");
-    textArea.style.position = "absolute";
-    textArea.style.left = "-9999px";
-    document.body.appendChild(textArea);
-    textArea.select();
-    const copied = document.execCommand("copy");
-    document.body.removeChild(textArea);
-
-    if (!copied) {
-      throw new Error("Copy command was rejected");
-    }
-  }
-
   async function shareActivity(activityName, details, formattedSchedule) {
-    const shareUrl = createActivityShareUrl(activityName);
-    const shareText = createActivityShareText(
+    const shareUrl = shareUtils.createActivityShareUrl(
+      window.location.href,
+      activityName
+    );
+    const shareText = shareUtils.createActivityShareText(
       activityName,
       details,
       formattedSchedule
@@ -359,7 +329,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      await copyTextToClipboard(shareUrl);
+      await shareUtils.copyTextToClipboard(shareUrl);
       showMessage(`Copied share link for ${activityName}.`, "success");
     } catch (error) {
       if (error.name === "AbortError") {
@@ -373,7 +343,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function copyActivityLink(activityName) {
     try {
-      await copyTextToClipboard(createActivityShareUrl(activityName));
+      await shareUtils.copyTextToClipboard(
+        shareUtils.createActivityShareUrl(window.location.href, activityName)
+      );
       showMessage(`Copied share link for ${activityName}.`, "success");
     } catch (error) {
       console.error("Error copying activity link:", error);
@@ -382,12 +354,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function emailActivity(activityName, details, formattedSchedule) {
-    const shareUrl = createActivityShareUrl(activityName);
+    const shareUrl = shareUtils.createActivityShareUrl(
+      window.location.href,
+      activityName
+    );
     const subject = encodeURIComponent(
       `Mergington High School activity: ${activityName}`
     );
     const body = encodeURIComponent(
-      `${createActivityShareText(
+      `${shareUtils.createActivityShareText(
         activityName,
         details,
         formattedSchedule
@@ -396,15 +371,28 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   }
 
-  function highlightActivityFromHash(shouldMoveFocus = false) {
-    const rawHash = window.location.hash.slice(1);
-    let activityName = rawHash;
+  function resetFiltersForSharedActivity() {
+    currentFilter = "all";
+    searchQuery = "";
+    currentDay = "";
+    currentTimeRange = "";
+    searchInput.value = "";
 
-    try {
-      activityName = decodeURIComponent(rawHash);
-    } catch (error) {
-      console.warn("Ignoring invalid activity hash.", error);
-    }
+    categoryFilters.forEach((button) => {
+      button.classList.toggle("active", button.dataset.category === "all");
+    });
+
+    dayFilters.forEach((button) => {
+      button.classList.toggle("active", button.dataset.day === "");
+    });
+
+    timeFilters.forEach((button) => {
+      button.classList.toggle("active", button.dataset.time === "");
+    });
+  }
+
+  function highlightActivityFromHash(shouldMoveFocus = false) {
+    const activityName = shareUtils.decodeActivityHash(window.location.hash);
 
     document.querySelectorAll(".activity-card-highlight").forEach((card) => {
       card.classList.remove("activity-card-highlight");
@@ -419,6 +407,19 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     if (!activityCard) {
+      if (
+        !isResettingFiltersForSharedActivity &&
+        (currentFilter !== "all" ||
+          searchQuery ||
+          currentDay ||
+          currentTimeRange)
+      ) {
+        isResettingFiltersForSharedActivity = true;
+        resetFiltersForSharedActivity();
+        fetchActivities().finally(() => {
+          isResettingFiltersForSharedActivity = false;
+        });
+      }
       return;
     }
 
@@ -628,9 +629,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Format the schedule using the new helper function
     const formattedSchedule = formatSchedule(details);
-    const shareText = createActivityShareText(name, details, formattedSchedule);
-    const shareUrl = createActivityShareUrl(name);
-    const shareLabelId = `share-label-${createActivityDomIdValue(name)}`;
+    const shareText = shareUtils.createActivityShareText(
+      name,
+      details,
+      formattedSchedule
+    );
+    const shareUrl = shareUtils.createActivityShareUrl(window.location.href, name);
+    const shareLabelId = `share-label-${shareUtils.createActivityDomIdValue(name)}`;
+    const supportsNativeShare = typeof navigator.share === "function";
 
     // Create activity tag
     const tagHtml = `
@@ -689,12 +695,18 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="sharing-actions">
           <span class="sharing-label" id="${shareLabelId}">Share this activity:</span>
           <div class="sharing-buttons" role="group" aria-labelledby="${shareLabelId}">
+            ${
+              supportsNativeShare
+                ? `
             <button
               type="button"
               class="share-button native-share-button"
             >
               Share
             </button>
+            `
+                : ""
+            }
             <button
               type="button"
               class="share-button copy-share-button"
@@ -751,9 +763,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const copyShareButton = activityCard.querySelector(".copy-share-button");
     const emailShareButton = activityCard.querySelector(".share-link-button");
 
-    nativeShareButton.addEventListener("click", async () => {
-      await shareActivity(name, details, formattedSchedule);
-    });
+    if (nativeShareButton) {
+      nativeShareButton.addEventListener("click", async () => {
+        await shareActivity(name, details, formattedSchedule);
+      });
+    }
 
     copyShareButton.addEventListener("click", async () => {
       await copyActivityLink(name);
