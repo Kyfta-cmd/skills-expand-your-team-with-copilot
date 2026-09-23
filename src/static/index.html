@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mergington High School Activities</title>
+    <script>
+      if (localStorage.getItem("theme") === "dark") {
+        document.documentElement.classList.add("dark-mode");
+      }
+    </script>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -11,8 +16,8 @@
       <h1>Mergington High School</h1>
       <h2>Extracurricular Activities</h2>
       <div id="user-controls">
-        <button id="theme-toggle" class="icon-button" aria-label="Switch to dark mode">
-          <span id="theme-icon">🌙</span>
+        <button id="theme-toggle" class="icon-button">
+          <span id="theme-icon" aria-hidden="true">🌙</span>
           <span id="theme-label">Dark</span>
         </button>
         <div id="user-status">

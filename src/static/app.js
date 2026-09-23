@@ -171,6 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function applyTheme(theme) {
     const isDarkMode = theme === "dark";
+    document.documentElement.classList.toggle("dark-mode", isDarkMode);
     document.body.classList.toggle("dark-mode", isDarkMode);
 
     if (themeIcon) {
@@ -178,12 +179,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (themeLabel) {
       themeLabel.textContent = isDarkMode ? "Light" : "Dark";
-    }
-    if (themeToggle) {
-      themeToggle.setAttribute(
-        "aria-label",
-        isDarkMode ? "Switch to light mode" : "Switch to dark mode"
-      );
     }
 
     localStorage.setItem("theme", isDarkMode ? "dark" : "light");
