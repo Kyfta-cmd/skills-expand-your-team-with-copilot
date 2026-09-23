@@ -371,6 +371,10 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   }
 
+  function getActivityCardId(activityName) {
+    return `activity-card-${shareUtils.createActivityDomIdValue(activityName)}`;
+  }
+
   function resetFiltersForSharedActivity() {
     currentFilter = "all";
     searchQuery = "";
@@ -402,9 +406,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const activityCard = Array.from(document.querySelectorAll(".activity-card")).find(
-      (card) => card.dataset.activityName === activityName
-    );
+    const activityCard = document.getElementById(getActivityCardId(activityName));
 
     if (!activityCard) {
       if (
@@ -418,6 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
         resetFiltersForSharedActivity();
         fetchActivities().finally(() => {
           isResettingFiltersForSharedActivity = false;
+          highlightActivityFromHash(shouldMoveFocus);
         });
       }
       return;
@@ -606,6 +609,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const activityCard = document.createElement("div");
     activityCard.className = "activity-card";
     activityCard.dataset.activityName = name;
+    activityCard.id = getActivityCardId(name);
     activityCard.tabIndex = -1;
 
     // Calculate spots and capacity
