@@ -304,16 +304,12 @@ document.addEventListener("DOMContentLoaded", () => {
     return details.schedule;
   }
 
-  function createActivitySlug(activityName) {
-    return activityName
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "");
+  function createActivityDomIdValue(activityName) {
+    return encodeURIComponent(activityName).replace(/%/g, "-");
   }
 
   function createActivityShareUrl(activityName) {
-    const url = new URL(window.location.href);
-    url.search = "";
+    const url = new URL("/static/index.html", window.location.origin);
     url.hash = encodeURIComponent(activityName);
     return url.toString();
   }
@@ -335,8 +331,12 @@ document.addEventListener("DOMContentLoaded", () => {
     textArea.style.left = "-9999px";
     document.body.appendChild(textArea);
     textArea.select();
-    document.execCommand("copy");
+    const copied = document.execCommand("copy");
     document.body.removeChild(textArea);
+
+    if (!copied) {
+      throw new Error("Copy command was rejected");
+    }
   }
 
   async function shareActivity(activityName, details, formattedSchedule) {
@@ -406,9 +406,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const activitySlug = createActivitySlug(activityName);
-    const activityCard = document.querySelector(
-      `[data-activity-slug="${activitySlug}"]`
+    const activityCard = Array.from(document.querySelectorAll(".activity-card")).find(
+      (card) => card.dataset.activityName === activityName
     );
 
     if (!activityCard) {
@@ -416,6 +415,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     activityCard.classList.add("activity-card-highlight");
+    activityCard.focus({ preventScroll: true });
     activityCard.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
@@ -593,7 +593,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderActivityCard(name, details) {
     const activityCard = document.createElement("div");
     activityCard.className = "activity-card";
-    activityCard.dataset.activitySlug = createActivitySlug(name);
+    activityCard.dataset.activityName = name;
+    activityCard.tabIndex = -1;
 
     // Calculate spots and capacity
     const totalSpots = details.max_participants;
@@ -618,6 +619,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const formattedSchedule = formatSchedule(details);
     const shareText = createActivityShareText(name, details, formattedSchedule);
     const shareUrl = createActivityShareUrl(name);
+    const shareLabelId = `share-label-${createActivityDomIdValue(name)}`;
 
     // Create activity tag
     const tagHtml = `
@@ -674,8 +676,8 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
       <div class="activity-card-actions">
         <div class="sharing-actions">
-          <span class="sharing-label">Share this activity:</span>
-          <div class="sharing-buttons">
+          <span class="sharing-label" id="${shareLabelId}">Share this activity:</span>
+          <div class="sharing-buttons" role="group" aria-labelledby="${shareLabelId}">
             <button
               type="button"
               class="share-button native-share-button"
