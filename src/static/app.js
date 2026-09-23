@@ -186,7 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function applyTheme(theme) {
+  function applyTheme(theme, { persist = true } = {}) {
     const isDarkMode = theme === "dark";
     document.documentElement.classList.toggle("dark-mode", isDarkMode);
     document.body.classList.toggle("dark-mode", isDarkMode);
@@ -205,15 +205,17 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     }
 
-    saveTheme(isDarkMode ? "dark" : "light");
+    if (persist) {
+      saveTheme(isDarkMode ? "dark" : "light");
+    }
   }
 
   function initializeTheme() {
     const savedTheme = getSavedTheme();
     if (savedTheme === "dark") {
-      applyTheme("dark");
+      applyTheme("dark", { persist: false });
     } else {
-      applyTheme("light");
+      applyTheme("light", { persist: false });
     }
   }
 
