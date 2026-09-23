@@ -4,6 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mergington High School Activities</title>
+    <script>
+      try {
+        if (localStorage.getItem("theme") === "dark") {
+          document.documentElement.classList.add("dark-mode");
+        }
+      } catch (error) {
+        console.warn("Unable to read saved theme preference.", error);
+      }
+    </script>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -11,6 +20,15 @@
       <h1>Mergington High School</h1>
       <h2>Extracurricular Activities</h2>
       <div id="user-controls">
+        <button
+          id="theme-toggle"
+          class="icon-button"
+          aria-pressed="false"
+          aria-label="Switch to dark mode"
+        >
+          <span id="theme-icon" aria-hidden="true">🌙</span>
+          <span id="theme-label">Dark</span>
+        </button>
         <div id="user-status">
           <button id="login-button" class="icon-button">
             <span class="user-icon">👤</span>
@@ -62,6 +80,27 @@
                 </button>
                 <button class="category-filter" data-category="technology">
                   Technology
+                </button>
+              </div>
+            </div>
+
+            <div class="filter-container difficulty-filter-container">
+              <div class="filter-label">Filter by difficulty:</div>
+              <div class="difficulty-filters" id="difficulty-filters">
+                <button class="difficulty-filter active" data-difficulty="all">
+                  All
+                </button>
+                <button class="difficulty-filter" data-difficulty="beginner">
+                  Beginner
+                </button>
+                <button
+                  class="difficulty-filter"
+                  data-difficulty="intermediate"
+                >
+                  Intermediate
+                </button>
+                <button class="difficulty-filter" data-difficulty="advanced">
+                  Advanced
                 </button>
               </div>
             </div>

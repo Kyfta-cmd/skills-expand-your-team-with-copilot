@@ -50,6 +50,33 @@ body {
   font-size: 0.9rem;
 }
 
+:root.dark-mode,
+body.dark-mode {
+  --primary: #5c6bc0;
+  --primary-light: #8e99f3;
+  --primary-dark: #26418f;
+  --primary-text: #ffffff;
+  --secondary: #ff9800;
+  --secondary-light: #ffc947;
+  --secondary-dark: #c66900;
+  --secondary-text: #000000;
+  --background: #121212;
+  --surface: #1e1e1e;
+  --text-primary: #f5f5f5;
+  --text-secondary: #c7c7c7;
+  --border: #3a3a3a;
+  --border-light: #2a2a2a;
+  --border-focus: #5f5f5f;
+  --success: #81c784;
+  --success-light: #1b3522;
+  --warning: #ffb74d;
+  --warning-light: #3a2b10;
+  --error: #ef9a9a;
+  --error-light: #3a1f1f;
+  --info: #80deea;
+  --info-light: #17363a;
+}
+
 header {
   text-align: center;
   padding: 12px 0;
@@ -596,6 +623,7 @@ footer {
 }
 
 .category-filters,
+.difficulty-filters,
 .day-filters,
 .time-filters {
   display: flex;
@@ -604,6 +632,7 @@ footer {
 }
 
 .category-filter,
+.difficulty-filter,
 .day-filter,
 .time-filter {
   background-color: var(--background);
@@ -617,6 +646,7 @@ footer {
 }
 
 .category-filter.active,
+.difficulty-filter.active,
 .day-filter.active,
 .time-filter.active {
   background-color: var(--primary);
@@ -625,6 +655,7 @@ footer {
 }
 
 .category-filter:hover,
+.difficulty-filter:hover,
 .day-filter:hover,
 .time-filter:hover {
   background-color: var(--primary-light);
@@ -675,6 +706,9 @@ footer {
   position: absolute;
   top: 10px;
   right: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 #user-status {
