@@ -5,8 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mergington High School Activities</title>
     <script>
-      if (localStorage.getItem("theme") === "dark") {
-        document.documentElement.classList.add("dark-mode");
+      try {
+        if (localStorage.getItem("theme") === "dark") {
+          document.documentElement.classList.add("dark-mode");
+        }
+      } catch (error) {
+        console.warn("Unable to read saved theme preference.", error);
       }
     </script>
     <link rel="stylesheet" href="styles.css" />

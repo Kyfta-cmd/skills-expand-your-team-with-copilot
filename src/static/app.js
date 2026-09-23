@@ -169,6 +169,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function getSavedTheme() {
+    try {
+      return localStorage.getItem("theme");
+    } catch (error) {
+      console.warn("Unable to read saved theme preference.", error);
+      return null;
+    }
+  }
+
+  function saveTheme(theme) {
+    try {
+      localStorage.setItem("theme", theme);
+    } catch (error) {
+      console.warn("Unable to save theme preference.", error);
+    }
+  }
+
   function applyTheme(theme) {
     const isDarkMode = theme === "dark";
     document.documentElement.classList.toggle("dark-mode", isDarkMode);
@@ -184,11 +201,11 @@ document.addEventListener("DOMContentLoaded", () => {
       themeToggle.setAttribute("aria-pressed", isDarkMode ? "true" : "false");
     }
 
-    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+    saveTheme(isDarkMode ? "dark" : "light");
   }
 
   function initializeTheme() {
-    const savedTheme = localStorage.getItem("theme");
+    const savedTheme = getSavedTheme();
     if (savedTheme === "dark") {
       applyTheme("dark");
     } else {
